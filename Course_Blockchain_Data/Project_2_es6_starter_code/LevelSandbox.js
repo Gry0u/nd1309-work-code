@@ -16,6 +16,18 @@ class LevelSandbox {
         let self = this;
         return new Promise(function(resolve, reject) {
             // Add your code here, remember un Promises you need to resolve() or reject()
+            self.db.get(key, (err, value) => {
+              if (err) {
+                if (err.type == 'NotFoundError') {
+                  resolve('undefined');
+                } else {
+                  console.log('Block' + key + ' get failed', err);
+                  reject(err);
+                }
+              } else {
+                resolve(value);
+              }
+            });
         });
     }
 
@@ -23,18 +35,31 @@ class LevelSandbox {
     addLevelDBData(key, value) {
         let self = this;
         return new Promise(function(resolve, reject) {
-            // Add your code here, remember un Promises you need to resolve() or reject() 
+            // Add your code here, remember un Promises you need to resolve() or reject()
+            self.db.put(key, value, err => {
+              if (err) {
+                console.log('Block' + key + ' submission failed', err);
+                reject(err);
+              } else {
+                resolve(value);
+              }
+            });
         });
     }
 
     // Method that return the height
     getBlocksCount() {
         let self = this;
-        return new Promise(function(resolve, reject){
+        let count = 0;
+        return new Promise((resolve, reject) => {
             // Add your code here, remember un Promises you need to resolve() or reject()
+            self.db.createReadStream()
+            .on('data', data => {count++;})
+            .on('error', err => {resolve(err);})
+            .on('close', () => {resolve(count);});
         });
     }
-        
+
 
 }
 
