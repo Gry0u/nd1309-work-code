@@ -19,7 +19,10 @@ class Blockchain {
   async generateGenesisBlock () {
     const height = await this.getBlockHeight()
     if (height < 0) {
-      this.addBlock(new Block.Block('Genesis block')).then(_ => console.log('Created Genesis block'))
+      const genesisBlock = new Block.Block('Genesis Block')
+      genesisBlock.time = time()
+      genesisBlock.hash = hash(genesisBlock)
+      this.bd.addLevelDBData(genesisBlock.height, JSON.stringify(genesisBlock)).then(_ => console.log('Genesis block created'))
     } else {
       console.log('Genesis block exists already')
     }
@@ -35,12 +38,15 @@ class Blockchain {
   async addBlock (newBlock) {
     const height = await this.getBlockHeight()
     newBlock.height = height + 1
-    newBlock.time = new Date().getTime().toString().slice(0, -3)
+    newBlock.time = time()
     if (newBlock.height > 0) {
       const previousBlock = await this.getBlock(height)
       newBlock.previousBlockHash = previousBlock.hash
+    } else {
+      // if no genesis block create one
+      await this.generateGenesisBlock()
     }
-    newBlock.hash = SHA256(JSON.stringify(newBlock)).toString()
+    newBlock.hash = hash(newBlock)
     return this.bd.addLevelDBData(newBlock.height, JSON.stringify(newBlock))
   }
 
@@ -50,7 +56,16 @@ class Blockchain {
   }
 
   // Validate if Block is being tampered by Block Height
-  validateBlock (height) {
+  async validateBlock (height) {
+    const block = await this.getBlock(height)
+    const blockHash = block.hash
+    block.hash = ''
+    const validBlockHash = hash(block)
+    if (validBlockHash === blockHash) {
+      return true
+    } else {
+      return false
+    }
   }
 
   // Validate Blockchain
@@ -72,6 +87,17 @@ class Blockchain {
         })
     })
   }
+}
+
+// HELPERS
+// Get time
+function time () {
+  return new Date().getTime().toString().slice(0, -3)
+}
+
+// Hash data
+function hash (objData) {
+  return SHA256(JSON.stringify(objData)).toString()
 }
 
 module.exports.Blockchain = Blockchain
