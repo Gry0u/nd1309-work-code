@@ -9,13 +9,13 @@ let myBlockChain = new BlockChain.Blockchain();
 
 setTimeout(function () {
 	console.log("Waiting...")
-}, 10000);
+}, 500);
 
 /******************************************
  ** Function for Create Tests Blocks   ****
  ******************************************/
 
-
+/*
 (function theLoop (i) {
 	setTimeout(function () {
 		let blockTest = new Block.Block("Test Block - " + (i + 1));
@@ -25,16 +25,17 @@ setTimeout(function () {
 			i++;
 			if (i < 10) theLoop(i);
 		});
-	}, 10000);
+	}, 2000);
   })(0);
-
+*/
 
 /***********************************************
  ** Function to get the Height of the Chain ****
  ***********************************************/
 
-/*
+
 // Be careful this only will work if `getBlockHeight` method in Blockchain.js file return a Promise
+/*
 myBlockChain.getBlockHeight().then((height) => {
 	console.log(height);
 }).catch((err) => { console.log(err);});
@@ -44,19 +45,21 @@ myBlockChain.getBlockHeight().then((height) => {
  ******** Function to Get a Block  *************
  ***********************************************/
 
-/*
+
 // Be careful this only will work if `getBlock` method in Blockchain.js file return a Promise
+/*
 myBlockChain.getBlock(0).then((block) => {
 	console.log(JSON.stringify(block));
 }).catch((err) => { console.log(err);});
-*?
+*/
 
 /***********************************************
  ***************** Validate Block  *************
  ***********************************************/
 
-/*
+
 // Be careful this only will work if `validateBlock` method in Blockchain.js file return a Promise
+/*
 myBlockChain.validateBlock(0).then((valid) => {
 	console.log(valid);
 })
@@ -95,21 +98,19 @@ myBlockChain.getBlock(6).then((block) => {
 		}
 	}).catch((err) => { console.log(err);});
 }).catch((err) => { console.log(err);});
-
+*/
 /***********************************************
  ***************** Validate Chain  *************
  ***********************************************/
 
-/*
+
 // Be careful this only will work if `validateChain` method in Blockchain.js file return a Promise
-myBlockChain.validateChain().then((errorLog) => {
-	if(errorLog.length > 0){
-		console.log("The chain is not valid:");
-		errorLog.forEach(error => {
-			console.log(error);
-		});
+/*
+myBlockChain.validateChain().then(validationResult => {
+	if(validationResult){
+		console.log("The chain is valid.");
 	} else {
-		console.log("No errors found, The chain is Valid!");
+		console.log("The chain is not valid!");
 	}
 })
 .catch((error) => {
