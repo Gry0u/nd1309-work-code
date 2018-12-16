@@ -12,10 +12,7 @@ class Blockchain {
     this.generateGenesisBlock()
   }
 
-  /* Auxiliar method to create a Genesis Block (always with height= 0)
-  You have to options, because the method will always execute when you
-  create your blockchain you will need to set this up statically or instead you
-  can verify if the height !== 0 then you will not create the genesis block */
+  // Create genesis block
   async generateGenesisBlock () {
     const height = await this.getBlockHeight()
     if (height < 0) {
@@ -28,13 +25,18 @@ class Blockchain {
     }
   }
 
-  // Get block height, it is auxiliar method that return the height of the blockchain
+  /* Get the height of the BlockChain
+  returns: Promise
+  */
   async getBlockHeight () {
     const blocksCount = await this.bd.getBlocksCount() - 1
     return blocksCount
   }
 
-  // Add new block
+  /* Add new block
+  arg: Block
+  returns: Promise
+  */
   async addBlock (newBlock) {
     const height = await this.getBlockHeight()
     newBlock.height = height + 1
@@ -47,15 +49,22 @@ class Blockchain {
       await this.generateGenesisBlock()
     }
     newBlock.hash = hash(newBlock)
+    // Store block within levelDB
     return this.bd.addLevelDBData(newBlock.height, JSON.stringify(newBlock))
   }
 
-  // Get Block By Height
+  /* get block object from the blockchain
+  arg: height integer
+  returns: Promise
+  */
   async getBlock (height) {
     return JSON.parse(await this.bd.getLevelDBData(height))
   }
 
-  // Validate if Block is being tampered by Block Height
+  /* Validate block = check if a block has been tampered
+  arg: height integer
+  returns: Promise
+  */
   async validateBlock (height) {
     const block = await this.getBlock(height)
     const blockHash = block.hash
@@ -68,12 +77,25 @@ class Blockchain {
     }
   }
 
-  // Validate Blockchain
+  /* Validate link
+  arg: height integer
+  returns: Promise
+  */
+  async validateLink (height) {
+    const block = await this.getBlock(height)
+    const previousBlock = await this.getBlock(height - 1)
+    return (block.previousBlockHash === previousBlock.hash)
+  }
+
+  // Validate Blockchain (chek if all blocks are valid)
   async validateChain () {
     const height = await this.getBlockHeight()
     const promisesArray = []
-    for (let i = 0; i < height + 1; i++) {
-      promisesArray.push(await this.validateBlock(i))
+    // validate genesis block
+    promisesArray.push(await this.validateBlock(0))
+    // validate further blocks and their links
+    for (let i = 1; i < height + 1; i++) {
+      promisesArray.push(await this.validateBlock(i), await this.validateLink(i))
     }
     return Promise.all(promisesArray).then(valuesArray => {
       return !valuesArray.toString().includes('f')
