@@ -69,7 +69,15 @@ class Blockchain {
   }
 
   // Validate Blockchain
-  validateChain () {
+  async validateChain () {
+    const height = await this.getBlockHeight()
+    const promisesArray = []
+    for (let i = 0; i < height + 1; i++) {
+      promisesArray.push(await this.validateBlock(i))
+    }
+    return Promise.all(promisesArray).then(valuesArray => {
+      return !valuesArray.toString().includes('f')
+    })
   }
 
   // Utility Method to Tamper a Block for Test Validation
