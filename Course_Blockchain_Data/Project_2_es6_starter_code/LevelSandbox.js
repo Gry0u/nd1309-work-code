@@ -4,7 +4,7 @@
 
 const level = require('level')
 // TODO: change to ./chaindata when ready
-const chainDB = './chaindatatest'
+const chainDB = './chaindata'
 
 class LevelSandbox {
   constructor () {
